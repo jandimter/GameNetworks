@@ -46,6 +46,8 @@ Game = ntc.Networks_Game(Users.keys(), graph_path, Round = Metadata["Round"])
 
 Game.apply_changes(students)
 
+print(list(Game.graph.edges))
+
 Game.save_network("Graph_Round"+str(Game.round)+".txt")
 
 

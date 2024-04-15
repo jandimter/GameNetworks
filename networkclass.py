@@ -22,7 +22,7 @@ class Networks_Game:
         #    self.graph = nx.Graph()
         #    
         #else:
-        self.graph = nx.read_edgelist(Network, create_using=nx.Graph())
+        self.graph = nx.read_edgelist(Network, create_using=nx.DiGraph())
         self.graph.add_nodes_from(self.students)
             
         
