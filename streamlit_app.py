@@ -43,9 +43,9 @@ def Log_in():
     with placeholder:
             "Introduce your user id and password:"
             
-            USER_ID = st.text_input("Enter your student ID", "", 8,"USER_ID")
+            USER_ID = st.text_input("Enter your student ID", "", 18,"USER_ID")
             
-            PASSWORD = st.text_input("Enter your password", "", 8,"PASSWORD", type = "password")
+            PASSWORD = st.text_input("Enter your password", "", 18,"PASSWORD", type = "password")
             
             LOGIN = st.button("ENTER", "Login_Button")
             
@@ -68,6 +68,7 @@ def Log_in():
                     except:
                         st.session_state.User = ntc.Student(USER_ID)
                     placeholder.empty()
+                    st.rerun()
                 else:
                     st.error("Log in failed")
                     

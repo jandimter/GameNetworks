@@ -9,6 +9,7 @@ import networkclass as ntc
 import pickle as pk
 import json
 import os
+import networkx as nx
 
 path = './'
 
@@ -60,4 +61,65 @@ Metadata["Round"] = Game.round
 with open('Metadata.txt', 'w') as fp:
     json.dump(Metadata, fp)
     fp.close()
+
+import csv
+import os
+
+log_filename = 'log_changes.csv'
+log_exists = os.path.exists(log_filename)
+
+with open(log_filename, mode='a', newline='', encoding='utf-8') as logfile:
+    logwriter = csv.writer(logfile)
+
+    # Si el archivo es nuevo, escribe los encabezados
+    if not log_exists:
+        logwriter.writerow(['Round', 'UserID', 'Add1', 'Add2', 'Removed', 'Randomized'])
+
+    for student in students:
+        logwriter.writerow([
+            Game.round,                              # Ronda actual
+            student.id,                              # ID Usuario
+            student.add1 if student.add1 else '',    # Conexión añadida 1
+            student.add2 if student.add2 else '',    # Conexión añadida 2
+            student.rem if student.rem else '',      # Conexión removida
+            False                                    # No aleatorizado
+        ])
+
+    # Registro usuarios aleatorizados (usa conexiones reales del grafo)
+    missing_students = [x for x in Game.students if Game.pending_changes[x]]
+
+    for ID in missing_students:
+        # Obtener las conexiones efectivamente asignadas en el grafo actual
+        current_connections = set(Game.graph.successors(ID))
+
+        # Las conexiones previas se leen desde el grafo anterior (antes de cambios)
+        graph_path_prev = "Graph_Round" + str(Game.round - 1) + ".txt"
+        graph_prev = nx.DiGraph()
+        if os.path.exists(graph_path_prev) and os.path.getsize(graph_path_prev) > 0:
+            graph_prev = nx.read_edgelist(graph_path_prev, create_using=nx.DiGraph())
+        if ID in graph_prev:
+            previous_connections = set(graph_prev.successors(ID))
+        else:
+            previous_connections = set()
+
+
+        # Los nuevos enlaces asignados aleatoriamente son:
+        new_connections = current_connections - previous_connections
+        removed_connections = previous_connections - current_connections
+
+        new_connections = list(new_connections)
+        removed_connections = list(removed_connections)
+
+        add1 = new_connections[0] if len(new_connections) >= 1 else ''
+        add2 = new_connections[1] if len(new_connections) >= 2 else ''
+        rem = removed_connections[0] if len(removed_connections) >= 1 else ''
+
+        logwriter.writerow([
+            Game.round,  # Ronda actual
+            ID,          # ID Usuario
+            add1,        # Aleatorio añadido 1
+            add2,        # Aleatorio añadido 2
+            rem,         # Aleatorio removido
+            True         # Aleatorizado
+        ])
 
